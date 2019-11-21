@@ -19,7 +19,9 @@
 const path = require('path');
 const fs = require('fs-extra');
 
-const ENV_PARAMS = ['OW_APIHOST', 'OW_AUTH', 'OW_NAMESPACE', 'OW_APIGW_ACCESS_TOKEN'];
+// WHISK_ is used by wsk CLI, OW_ is used by OpenWhisk serverless plugin
+const ENV_PREFIXES = [ 'OW_', 'WHISK_' ]
+const ENV_PARAMS = [ 'APIHOST', 'AUTH', 'NAMESPACE', 'APIGW_ACCESS_TOKEN' ]
 
 function getWskPropsFile() {
   const Home = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -52,8 +54,11 @@ function getWskProps() {
 
 function getWskEnvProps() {
   const envProps = {};
-  ENV_PARAMS.forEach((envName) => {
-    if (process.env[envName]) envProps[envName.slice(3).toLowerCase()] = process.env[envName];
+  ENV_PARAMS.forEach((envParam) => {
+    ENV_PREFIXES.forEach((envPrefix) => {
+      const envFullName = envPrefix + envParam;
+      if (process.env[envFullName]) envProps[envParam.toLowerCase()] = process.env[envFullName];
+    })
   });
   return envProps;
 }
